@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <style>
+html,
+body
+{
+    height: 100%;
+}
+
+body
+{
+    margin: 0;
+
+    padding: 0;
+}
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.css">
+</head>
+<body>
+
+
+<script src="https://yandex.st/jquery/1.10.2/jquery.min.js"></script>
+
+<script src="https://rawgithub.com/hoho/concat.js/master/concat.min.js"></script>
+<script src="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.js"></script>
+
+<script>
+
+(function(w) {
+    w.requestAnimationFrame = w.requestAnimationFrame ||
+                              w.mozRequestAnimationFrame ||
+                              w.webkitRequestAnimationFrame ||
+                              w.msRequestAnimationFrame ||
+                              function(callback) {
+                                  w.setTimeout(callback, 0);
+                              };
+})(window);
+
+
+var timeline = new Timeline(
+        document.body,
+        function(elem, event, handler) { $(elem).on(event, handler); }
+    );
+
+var idPrefix = 0,
+    colors = ['coral', 'darkseagreen', 'steelblue', 'orange'];
+
+// Setting callbacks.
+timeline
+    // Setting Timeline bounds.
+    .bounds(
+        {
+            minTime: new Date(2010, 0, 1).getTime(),
+            maxTime: new Date(2015, 0, 1).getTime(),
+            preloadBefore: 2,
+            preloadAfter: 2,
+            viewport: 2,
+            minViewport: 0.25,
+            maxViewport: 4,
+            now: new Date().getTime()
+        })
+    // Setting events getter.
+    .events(
+        function(timeFrom, timeTo) {
+            window.setTimeout(function() {
+                var events = [],
+                    i,
+                    j,
+                    total,
+                    begin,
+                    end,
+                    marks,
+                    _24hours = 86400000,
+                    dayFrom = timeFrom,
+                    dayTo = timeFrom + _24hours;
+
+                // Generate from 10 to 30 random events per 24 hours.
+                while (dayTo <= timeTo) {
+                    idPrefix++;
+
+                    total = Math.floor(10 + 20 * Math.random());
+
+                    for (i = 0; i < total; i++) {
+                        begin = Math.floor((dayTo - dayFrom) * Math.random() + dayFrom);
+                        end = Math.random() > 0.5 ? Math.floor((dayTo - begin) * Math.random() + begin) : begin;
+
+                        if (begin < end && Math.random() < 0.3) {
+                            marks = [];
+
+                            for (j = 0; j < 10 * Math.random(); j++) {
+                                marks.push(begin + Math.floor(Math.random() * (end - begin)));
+                            }
+                        } else {
+                            marks = undefined;
+                        }
+
+                        events.push({
+                            id: idPrefix + '-' + i,
+                            data: 'hello from ' + idPrefix + '-' + i,
+                            title: Math.random(),
+                            begin: begin,
+                            end: end,
+                            marks: marks,
+                            color: colors[Math.round(Math.random() * (colors.length - 1))]
+                        });
+                    }
+
+                    dayFrom = dayTo;
+                    dayTo += _24hours;
+                }
+
+                timeline.push(timeFrom, timeTo, events);
+            }, 200);
+        })
+    // Setting click handler.
+    .click(
+        function(e, id, markIndex, data) {
+            alert(id + ', ' + (markIndex === undefined ? 'no marks' : 'mark index: ' + markIndex) + (data ? ', ' + data : ''));
+        })
+    // Setting initial position to start working.
+    .position(new Date().getTime());
+
+</script>
+</body>
+</html>
