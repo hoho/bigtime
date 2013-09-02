@@ -1,5 +1,5 @@
 /*!
- * b-timeline v0.0.1, https://github.com/hoho/b-timeline
+ * b-timeline v0.1.0, https://github.com/hoho/b-timeline
  * Copyright 2013 Marat Abdullin
  * Released under the MIT license
  */
@@ -186,9 +186,9 @@
             __scrollBarRightElem,
 
             __mainViewError,
-            __scrollBarError,
 
             __clickCallback,
+            __positionCallback,
 
             __resizeTimer,
 
@@ -224,8 +224,8 @@
                     __realPosition,
 
                     __curAnimationDestination,
-                    __curAnimationStepFunc,
-                    __curNoPositionCallback,
+                    __curAnimationStepCallback,
+                    __curPositionCallbackFirstArg,
 
                     __prevNow,
 
@@ -671,7 +671,10 @@
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.setPosition = function(pos, animate, animationStepFunc, noPositionCallback) {
+                timelineInternalObj.setPosition = function(pos, animate,
+                                                           animationStepCallback,
+                                                           positionCallbackFirstArg)
+                {
                     if (!isUndefined(animate)) {
                         var x = timelineInternalObj.getX(__position),
                             delta = abs(__position - animate),
@@ -694,13 +697,14 @@
                         i,
                         val,
                         unadopted = [],
-                        getEventsFunc;
+                        getEventsFunc,
+                        animateIsUndefined = isUndefined(animate);
 
                     __prevViewportSize = __viewportSize;
 
                     __curAnimationDestination = animate;
-                    __curAnimationStepFunc = animationStepFunc;
-                    __curNoPositionCallback = noPositionCallback;
+                    __curAnimationStepCallback = animationStepCallback;
+                    __curPositionCallbackFirstArg = positionCallbackFirstArg;
 
                     prevPos = __position;
 
@@ -774,34 +778,38 @@
                         // In case of animation we're probably jumping through
                         // quite fast. So, we need to request events only when
                         // animation stops.
-                        if (isUndefined(animate)) {
+                        if (animateIsUndefined) {
                             getEventsFunc();
                         } else {
                             __getEventsTimer = window.setTimeout(getEventsFunc, 55);
                         }
                     }
 
-                    if (!isUndefined(animate) && __position !== prevPos) {
+                    if (!animateIsUndefined && __position !== prevPos) {
                         window.requestAnimationFrame(
                             function() {
                                 if (!isUndefined(__curAnimationDestination)) {
                                     timelineInternalObj.setPosition(
                                         undefined,
                                         __curAnimationDestination,
-                                        __curAnimationStepFunc,
-                                        __curNoPositionCallback
+                                        __curAnimationStepCallback,
+                                        __curPositionCallbackFirstArg
                                     );
                                 }
                             }
                         );
                     }
 
-                    if (animationStepFunc) {
-                        animationStepFunc(__position, prevPos);
+                    if (animationStepCallback) {
+                        animationStepCallback(__position, prevPos);
                     }
 
-                    if (!noPositionCallback && positionCallback) {
-                        positionCallback(__position, prevPos);
+                    if (positionCallback) {
+                        positionCallback(
+                            positionCallbackFirstArg,
+                            !animateIsUndefined,
+                            __position,
+                            prevPos);
                     }
 
                     return __position;
@@ -1250,17 +1258,27 @@
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.click = function(callback) {
-            __clickCallback = callback;
+        timelineObj.resize = function() {
+            __evaluateBounds__();
+            __mainView.resize();
+            __scrollBar.resize();
 
             return timelineObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.resize = function() {
-            __evaluateBounds__();
-            __mainView.resize();
-            __scrollBar.resize();
+        timelineObj.on = function(what, callback) {
+            callback = bind(timelineObj, callback);
+
+            switch (what) {
+                case 'click':
+                    __clickCallback = callback;
+                    break;
+
+                case 'position':
+                    __positionCallback = callback;
+                    break;
+            }
 
             return timelineObj;
         };
@@ -1330,13 +1348,21 @@
                                 }
                             },
 
-                            function(pos, prev) {
-                                __scrollBar.setPosition(
-                                    isUndefined(prev) ?
-                                        pos
-                                        :
-                                        __scrollBar.getPosition() + (pos - prev)
-                                );
+                            function(customArg, isAnimation, pos, prev) {
+                                if (pos !== prev) {
+                                    if (!customArg) {
+                                        __scrollBar.setPosition(
+                                            isUndefined(prev) ?
+                                                pos
+                                                :
+                                                __scrollBar.getPosition() + (pos - prev)
+                                        );
+                                    }
+
+                                    if (__positionCallback && !isAnimation) {
+                                        __positionCallback(pos, prev);
+                                    }
+                                }
                             }
                         );
                     })

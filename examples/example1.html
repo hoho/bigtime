@@ -52,17 +52,16 @@ var idPrefix = 0,
 // Setting callbacks.
 timeline
     // Setting Timeline bounds.
-    .bounds(
-        {
-            minTime: new Date(2010, 0, 1).getTime(),
-            maxTime: new Date(2015, 0, 1).getTime(),
-            preloadBefore: 2,
-            preloadAfter: 2,
-            viewport: 2,
-            minViewport: 0.25,
-            maxViewport: 4,
-            now: new Date().getTime()
-        })
+    .bounds({
+        minTime: new Date(2010, 0, 1).getTime(),
+        maxTime: new Date(2015, 0, 1).getTime(),
+        preloadBefore: 2,
+        preloadAfter: 2,
+        viewport: 2,
+        minViewport: 0.25,
+        maxViewport: 4,
+        now: new Date().getTime()
+    })
     // Setting events getter.
     .events(
         function(timeFrom, timeTo) {
@@ -115,12 +114,15 @@ timeline
 
                 timeline.push(timeFrom, timeTo, events);
             }, 200);
-        })
+        }
+    )
     // Setting click handler.
-    .click(
+    .on(
+        'click',
         function(e, id, markIndex, data) {
             alert(id + ', ' + (markIndex === undefined ? 'no marks' : 'mark index: ' + markIndex) + (data ? ', ' + data : ''));
-        })
+        }
+    )
     // Setting initial position to start working.
     .position(new Date().getTime());
 
