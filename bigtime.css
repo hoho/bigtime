@@ -1,7 +1,6 @@
 /*!
- * b-timeline v0.1.0, https://github.com/hoho/b-timeline
- * Copyright 2013 Marat Abdullin
- * Released under the MIT license
+ * bigtime v0.2.0, https://github.com/hoho/bigtime
+ * (c) 2013-2015 Marat Abdullin, MIT license
  */
 .b-timeline
 {
@@ -18,10 +17,7 @@
     position: relative;
 
     -webkit-touch-callout: none;
-      -webkit-user-select: none;
-         -moz-user-select: none;
-          -ms-user-select: none;
-              user-select: none;
+    user-select: none;
 
     width: 100%;
 }
@@ -39,10 +35,7 @@
 
     top: 0;
 
-    -webkit-transition: width .2s;
-       -moz-transition: width .2s;
-         -o-transition: width .2s;
-            transition: width .2s;
+    transition: width .2s;
 
     width: 10px;
 
@@ -92,10 +85,7 @@
 
     top: 50%;
 
-    -webkit-transition: left .2s;
-       -moz-transition: left .2s;
-         -o-transition: left .2s;
-            transition: left .2s;
+    transition: left .2s;
 }
 
 .b-timeline__left div
@@ -155,24 +145,14 @@
 
     top: 0;
 
-    -webkit-transition: background-color .2s;
-       -moz-transition: background-color .2s;
-         -o-transition: background-color .2s;
-            transition: background-color .2s;
+    transition: background-color .2s;
 }
 
 .b-timeline__timeframe_loading
 {
-    -webkit-animation: stripes 1s linear infinite;
-       -moz-animation: stripes 1s linear infinite;
-        -ms-animation: stripes 1s linear infinite;
-         -o-animation: stripes 1s linear infinite;
-            animation: stripes 1s linear infinite;
+    animation: stripes 1s linear infinite;
 
     background-color: #e7e7e7;
-    background-image: -webkit-gradient(linear, 0 100%, 100% 0, color-stop(0.25, rgba(255, 255, 255, 0.15)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.15)), color-stop(0.75, rgba(255, 255, 255, 0.15)), color-stop(0.75, transparent), to(transparent));
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-    background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-size: 70px 70px;
 }
@@ -180,26 +160,6 @@
 .b-timeline__timeframe_loading .b-timeline__future-overlay
 {
     opacity: 0;
-}
-
-@-webkit-keyframes stripes {
-    from { background-position: 70px 0; }
-      to { background-position: 0 0; }
-}
-
-@-moz-keyframes stripes {
-    from { background-position: 70px 0; }
-      to { background-position: 0 0; }
-}
-
-@-ms-keyframes stripes {
-    from { background-position: 70px 0; }
-      to { background-position: 0 0; }
-}
-
-@-o-keyframes stripes {
-    from { background-position: 0 0; }
-      to { background-position: 70px 0; }
 }
 
 @keyframes stripes {
@@ -302,7 +262,6 @@
     bottom: -1000px;
 
     opacity: .5;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
 
     position: absolute;
 
@@ -310,10 +269,7 @@
 
     top: -1000px;
 
-    -webkit-transition: opacity .2s;
-       -moz-transition: opacity .2s;
-         -o-transition: opacity .2s;
-            transition: opacity .2s;
+    transition: opacity .2s;
 
     z-index: 2;
 }
@@ -326,21 +282,13 @@
 
     position: absolute;
 
-    -webkit-transition: top .2s;
-       -moz-transition: top .2s;
-         -o-transition: top .2s;
-            transition: top .2s;
+    transition: top .2s;
 
     z-index: 1;
 }
 
 .b-timeline__event:before
 {
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(.1, rgba(0,0,0,0)), color-stop(1, rgba(0,0,0,.17)));
-    background: -webkit-linear-gradient(top, rgba(0,0,0,0) 10%, rgba(0,0,0,.17) 100%);
-    background: -moz-linear-gradient(top, rgba(0,0,0,0) 10%, rgba(0,0,0,.17) 100%);
-    background: -ms-linear-gradient(top, rgba(0,0,0,0) 10%, rgba(0,0,0,.17) 100%);
-    background: -o-linear-gradient(top, rgba(0,0,0,0) 10%, rgba(0,0,0,.17) 100%);
     background: linear-gradient(to bottom, rgba(0,0,0,0) 10%, rgba(0,0,0,.17) 100%);
 
     content: '';
@@ -398,37 +346,10 @@
 
 .b-timeline__event_type_unfinished
 {
-    -webkit-animation: stripes-small 1s linear infinite;
-       -moz-animation: stripes-small 1s linear infinite;
-        -ms-animation: stripes-small 1s linear infinite;
-         -o-animation: stripes-small 1s linear infinite;
-            animation: stripes-small 1s linear infinite;
+    animation: stripes-small 1s linear infinite;
 
-    background-image: -webkit-gradient(linear, 0 100%, 100% 0, color-stop(0.25, rgba(255, 255, 255, 0.15)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.15)), color-stop(0.75, rgba(255, 255, 255, 0.15)), color-stop(0.75, transparent), to(transparent));
-    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-    background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-size: 20px 20px;
-}
-
-@-webkit-keyframes stripes-small {
-    from { background-position: 20px 0; }
-      to { background-position: 0 0; }
-}
-
-@-moz-keyframes stripes-small {
-    from { background-position: 20px 0; }
-      to { background-position: 0 0; }
-}
-
-@-ms-keyframes stripes-small {
-    from { background-position: 20px 0; }
-      to { background-position: 0 0; }
-}
-
-@-o-keyframes stripes-small {
-    from { background-position: 0 0; }
-      to { background-position: 20px 0; }
 }
 
 @keyframes stripes-small {
@@ -496,11 +417,6 @@
 
 .b-timeline__gap
 {
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f7f7f7), color-stop(.9, #fff));
-    background: -webkit-linear-gradient(top, #f7f7f7 0, #fff 90%);
-    background: -moz-linear-gradient(top, #f7f7f7 0, #fff 90%);
-    background: -ms-linear-gradient(top, #f7f7f7 0, #fff 90%);
-    background: -o-linear-gradient(top, #f7f7f7 0, #fff 90%);
     background: linear-gradient(to bottom, #f7f7f7 0, #fff 90%);
 
     border-bottom: 1px solid #ddd;
@@ -616,11 +532,6 @@
 .b-timeline__scaler-button
 {
     background: #ddd;
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fff), color-stop(.9, #ddd));
-    background: -webkit-linear-gradient(top, #fff 0, #ddd 90%);
-    background: -moz-linear-gradient(top, #fff 0, #ddd 90%);
-    background: -ms-linear-gradient(top, #fff 0, #ddd 90%);
-    background: -o-linear-gradient(top, #fff 0, #ddd 90%);
     background: linear-gradient(to bottom, #fff 0, #ddd 90%);
 
     border: 1px solid rgba(0,0,0,.22);

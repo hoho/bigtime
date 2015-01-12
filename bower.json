@@ -1,0 +1,21 @@
+{
+    "name": "bigtime",
+    "version": "0.2.0",
+    "description": "JS/CSS timeline component",
+    "main": "bigtime.js",
+    "keywords": [
+        "timeline",
+        "time"
+    ],
+    "author": "Marat Abdullin <dakota@brokenpipe.ru>",
+    "license": "MIT",
+    "homepage": "https://github.com/hoho/bigtime",
+    "ignore": [
+        "node_modules",
+        "test",
+        "*.md",
+        "package.json",
+        "bower.json",
+        "gulpfile.js"
+    ]
+}

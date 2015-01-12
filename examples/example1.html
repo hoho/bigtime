@@ -18,7 +18,7 @@ body
 }
     </style>
 
-    <link rel="stylesheet" type="text/css" href="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.css">
+    <link rel="stylesheet" type="text/css" href="../build/bigtime.css">
 </head>
 <body>
 
@@ -26,8 +26,7 @@ body
 <script src="https://yandex.st/jquery/1.10.2/jquery.min.js"></script>
 
 <script src="https://rawgithub.com/hoho/concat.js/master/concat.min.js"></script>
-<!--<script src="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.js"></script>-->
-<script src="../b-timeline.js"></script>
+<script src="../build/bigtime.js"></script>
 <script>
 
 (function(w) {
@@ -41,7 +40,7 @@ body
 })(window);
 
 
-var timeline = new Timeline(
+var timeline = new Bigtime(
         document.body,
         function(elem, event, handler) { $(elem).on(event, handler); }
     );

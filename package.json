@@ -1,0 +1,35 @@
+{
+  "name": "bigtime",
+  "version": "0.2.0",
+  "description": "JS/CSS timeline component",
+  "main": "bigtime.js",
+  "scripts": {
+    "test": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hoho/bigtime.git"
+  },
+  "keywords": [
+    "timeline",
+    "time"
+  ],
+  "author": "Marat Abdullin <dakota@brokenpipe.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hoho/bigtime/issues"
+  },
+  "homepage": "https://github.com/hoho/bigtime",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "gulp": "~3.8.10",
+    "gulp-eslint": "~0.2.0",
+    "gulp-filter": "~2.0.0",
+    "gulp-rename": "~1.2.0",
+    "gulp-uglify": "~1.0.2",
+    "gulp-autoprefixer": "~2.0.0",
+    "gulp-minify-css": "~0.3.11",
+    "assert-version": "~0.0.3"
+  }
+}

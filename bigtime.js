@@ -1,7 +1,8 @@
 /*!
- * b-timeline v0.2.0, https://github.com/hoho/b-timeline
+ * bigtime v0.2.0, https://github.com/hoho/bigtime
  * (c) 2013-2015 Marat Abdullin, MIT license
  */
+/* global $C */
 (function(window, document, undefined) {
     'use strict';
 
@@ -42,7 +43,7 @@
                 val = props[prop];
                 // TODO: Add 'px' suffix to a certain properies only (left,
                 //       width and so on).
-                try { style[prop] = val + (typeof val === 'number' ? 'px' : ''); } catch(e) {};
+                try { style[prop] = val + (typeof val === 'number' ? 'px' : ''); } catch(e) {}
             }
         },
         ///////////////////////////////////////////////////////////////////////
@@ -88,12 +89,12 @@
                         if (event.detail) { delta = event.detail; }
 
                         // New school wheel delta (wheel event)
-                        if (event.deltaX && delta == 0) { delta  = event.deltaX; }
-                        if (event.deltaY && delta == 0) { delta = event.deltaY; }
+                        if (event.deltaX && delta === 0) { delta = event.deltaX; }
+                        if (event.deltaY && delta === 0) { delta = event.deltaY; }
 
                         // Webkit
-                        if (event.wheelDeltaX && delta == 0) { delta = event.wheelDeltaX; }
-                        if (event.wheelDeltaY && delta == 0) { delta = event.wheelDeltaY; }
+                        if (event.wheelDeltaX && delta === 0) { delta = event.wheelDeltaX; }
+                        if (event.wheelDeltaY && delta === 0) { delta = event.wheelDeltaY; }
 
                         absDelta = abs(delta);
 
@@ -107,7 +108,9 @@
                             event.preventDefault();
                         }
 
-                        return (event.returnValue = false);
+                        event.returnValue = false;
+
+                        return false;
                     };
 
             if (elem.addEventListener) {
@@ -134,12 +137,12 @@
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
 
-    T = window.Timeline = function(container, bindEventFunc) {
-        /* Naming: __something    is a private Timeline field,
-                   __something__  is a private Timeline method,
+    T = window.Bigtime = function(container, bindEventFunc) {
+        /* Naming: __something    is a private Bigtime field,
+                   __something__  is a private Bigtime method,
                    something      is just a variable. */
 
-        var timelineObj = this,
+        var bigtimeObj = this,
 
             __bounds = {
                 minTime:             0,
@@ -171,7 +174,6 @@
 
             __actualMinTime,
 
-            __elem,
             __errorElem,
             __pickElem,
             __scalerElem,
@@ -191,11 +193,11 @@
 
             __resizeTimer,
 
-            TimelineInternal = function(timeframesElem, leftElem, rightElem,
+            BigtimeInternal = function(timeframesElem, leftElem, rightElem,
                                         keyboardControl, clickCallback,
                                         positionCallback)
             {
-                var timelineInternalObj = this,
+                var bigtimeInternalObj = this,
 
                     mousedownX,
                     mousemoved,
@@ -234,7 +236,7 @@
 
                     __getEventsTimer,
                     __getEvents__ = function(timeFrom, timeTo) {
-                        timelineInternalObj.push(timeFrom, timeTo, []);
+                        bigtimeInternalObj.push(timeFrom, timeTo, []);
                     },
                     ///////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////
@@ -317,104 +319,41 @@
                     },
                     ///////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////
-                    __adoptEvents__ = function(events) {
-                        if (events.length) {
-                            var i,
-                                tmp,
-                                event,
-                                timeframeFrom,
-                                timeframeTo,
-                                timeframe;
-
-                            for (i = 0; i < events.length; i++) {
-                                event = events[i];
-
-                                // Get timeframes this event goes through.
-                                timeframeFrom = __getTimeframeByTime__(event.begin);
-                                timeframeTo = event.begin === event.end ?
-                                    timeframeFrom
-                                    :
-                                    __getTimeframeByTime__(isUndefined(event.end) ? __maxTime : event.end);
-
-                                if (timeframeTo < __timeframeFrom || timeframeFrom >= __timeframeTo) {
-                                    // Event is out of current timeframes, skip it.
-                                    continue;
-                                }
-
-                                // Getting event's parent timeframe.
-                                tmp = round((timeframeFrom + timeframeTo) / 2);
-                                event.timeframe = timeframe = tmp < __timeframeFrom ?
-                                    __timeframeFrom
-                                    :
-                                    tmp >= __timeframeTo ?
-                                        __timeframeTo - 1
-                                        :
-                                        tmp;
-
-                                timeframe = __timeframes[timeframe];
-
-                                event.tbegin = timeframeFrom;
-                                event.tend = timeframeTo;
-
-                                // Adding this event to timeframe's events and to
-                                // __events.
-                                timeframe.events[event.id] = true;
-
-                                if (isUndefined(event.end)) {
-                                    timeframe.unfinished[event.id] = true;
-                                }
-
-                                __events[event.id] = event;
-
-                                // Appending event's DOM nodes to timeframe's events
-                                // container.
-                                tmp = timeframe.eventsElem;
-
-                                if (event.elem1) {
-                                    // DOM nodes are already created.
-                                    tmp.appendChild(event.elem1);
-                                    tmp.appendChild(event.elem2);
-                                } else {
-                                    // Create new DOM nodes.
-                                    $C(tmp)
-                                        .div(event.color ? {style: {'background-color': event.color}} : undefined)
-                                            .act(function() { event.elem1 = this; })
-                                        .end()
-                                        .div({'data-id': event.id, title: event.title})
-                                            .act(function() { event.elem2 = this; })
-                                            .each(event.marks)
-                                                .span(markAttributes)
-                                            .end(2)
-                                            .text(event.title)
-                                    .end(2);
-                                }
-
-                                // Setting class names.
-                                tmp = undefined;
-
-                                if (event.begin === event.end) {
-                                    tmp = {type: 'point'};
-                                }
-
-                                event.elem2.className = bemClass('event-overlay', tmp);
-
-                                if (isUndefined(event.end)) {
-                                    tmp = {type: 'unfinished'}
-                                }
-
-                                event.elem1.className = bemClass('event', tmp);
-
-                                // We need to position this event.
-                                event.positioned = false;
-                            }
-
-                            __positionEvents__();
-                        }
+                    __getFirstTimeframeLeft__ = function() {
+                        return - (__realPosition - __timeframeFrom) * __getTimeframeWidth__();
                     },
                     ///////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////
-                    __getFirstTimeframeLeft__ = function() {
-                        return - (__realPosition - __timeframeFrom) * __getTimeframeWidth__();
+                    __setUnfinishedEventsWidths__ = function() {
+                        if (!isUndefined(__now)) {
+                            var i,
+                                id,
+                                unfinished,
+                                timeframeWidth = __getTimeframeWidth__(),
+                                timeframeFrom,
+                                width,
+                                event;
+
+                            timeframeFrom = __getTimeframeByTime__(__now);
+
+                            if (timeframeFrom >= __timeframeTo) {
+                                timeframeFrom = __timeframeTo;
+                            }
+
+                            width = round((timeframeFrom - __timeframeFrom) * timeframeWidth);
+
+                            for (i = __timeframeFrom; i < __timeframeTo; i++) {
+                                unfinished = __timeframes[i].unfinished;
+
+                                for (id in unfinished) {
+                                    event = __events[id];
+                                    css(event.elem1, {width: width - event.left});
+                                    css(event.elem2, {width: width - event.left});
+                                }
+
+                                width -= timeframeWidth;
+                            }
+                        }
                     },
                     ///////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////
@@ -601,35 +540,100 @@
                     },
                     ///////////////////////////////////////////////////////////
                     ///////////////////////////////////////////////////////////
-                    __setUnfinishedEventsWidths__ = function() {
-                        if (!isUndefined(__now)) {
+                    __adoptEvents__ = function(events) {
+                        if (events.length) {
                             var i,
-                                id,
-                                unfinished,
-                                timeframeWidth = __getTimeframeWidth__(),
+                                tmp,
+                                event,
                                 timeframeFrom,
-                                width,
-                                event;
+                                timeframeTo,
+                                timeframe,
+                                rememberElem1 = function() { event.elem1 = this;},
+                                rememberElem2 = function() { event.elem2 = this;};
 
-                            timeframeFrom = __getTimeframeByTime__(__now);
+                            for (i = 0; i < events.length; i++) {
+                                event = events[i];
 
-                            if (timeframeFrom >= __timeframeTo) {
-                                timeframeFrom = __timeframeTo;
-                            }
+                                // Get timeframes this event goes through.
+                                timeframeFrom = __getTimeframeByTime__(event.begin);
+                                timeframeTo = event.begin === event.end ?
+                                    timeframeFrom
+                                    :
+                                    __getTimeframeByTime__(isUndefined(event.end) ? __maxTime : event.end);
 
-                            width = round((timeframeFrom - __timeframeFrom) * timeframeWidth);
-
-                            for (i = __timeframeFrom; i < __timeframeTo; i++) {
-                                unfinished = __timeframes[i].unfinished;
-
-                                for (id in unfinished) {
-                                    event = __events[id];
-                                    css(event.elem1, {width: width - event.left});
-                                    css(event.elem2, {width: width - event.left});
+                                if (timeframeTo < __timeframeFrom || timeframeFrom >= __timeframeTo) {
+                                    // Event is out of current timeframes, skip it.
+                                    continue;
                                 }
 
-                                width -= timeframeWidth;
+                                // Getting event's parent timeframe.
+                                tmp = round((timeframeFrom + timeframeTo) / 2);
+                                event.timeframe = timeframe = tmp < __timeframeFrom ?
+                                    __timeframeFrom
+                                    :
+                                    tmp >= __timeframeTo ?
+                                    __timeframeTo - 1
+                                        :
+                                        tmp;
+
+                                timeframe = __timeframes[timeframe];
+
+                                event.tbegin = timeframeFrom;
+                                event.tend = timeframeTo;
+
+                                // Adding this event to timeframe's events and to
+                                // __events.
+                                timeframe.events[event.id] = true;
+
+                                if (isUndefined(event.end)) {
+                                    timeframe.unfinished[event.id] = true;
+                                }
+
+                                __events[event.id] = event;
+
+                                // Appending event's DOM nodes to timeframe's events
+                                // container.
+                                tmp = timeframe.eventsElem;
+
+                                if (event.elem1) {
+                                    // DOM nodes are already created.
+                                    tmp.appendChild(event.elem1);
+                                    tmp.appendChild(event.elem2);
+                                } else {
+                                    // Create new DOM nodes.
+                                    $C(tmp)
+                                        .div(event.color ? {style: {'background-color': event.color}} : undefined)
+                                        .act(rememberElem1)
+                                        .end()
+                                        .div({'data-id': event.id, title: event.title})
+                                        .act(rememberElem2)
+                                        .each(event.marks)
+                                        .span(markAttributes)
+                                        .end(2)
+                                        .text(event.title)
+                                        .end(2);
+                                }
+
+                                // Setting class names.
+                                tmp = undefined;
+
+                                if (event.begin === event.end) {
+                                    tmp = {type: 'point'};
+                                }
+
+                                event.elem2.className = bemClass('event-overlay', tmp);
+
+                                if (isUndefined(event.end)) {
+                                    tmp = {type: 'unfinished'};
+                                }
+
+                                event.elem1.className = bemClass('event', tmp);
+
+                                // We need to position this event.
+                                event.positioned = false;
                             }
+
+                            __positionEvents__();
                         }
                     },
                     ///////////////////////////////////////////////////////////
@@ -665,20 +669,20 @@
 
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.getPosition = function() {
+                bigtimeInternalObj.getPosition = function() {
                     return __position;
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.setPosition = function(pos, animate,
+                bigtimeInternalObj.setPosition = function(pos, animate,
                                                            animationStepCallback,
                                                            positionCallbackFirstArg)
                 {
                     if (!isUndefined(animate)) {
-                        var x = timelineInternalObj.getX(__position),
+                        var x = bigtimeInternalObj.getX(__position),
                             delta = abs(__position - animate),
                             offset = __position > animate ? -3 : 3,
-                            minTimeDelta = abs(__position - timelineInternalObj.byX(x + offset));
+                            minTimeDelta = abs(__position - bigtimeInternalObj.byX(x + offset));
 
                         if (delta < minTimeDelta) {
                             pos = animate;
@@ -769,7 +773,7 @@
                             timeFrom = val.timeFrom;
                             timeTo = val.timeTo;
 
-                            timelineInternalObj.status(timeFrom, timeTo, true, false);
+                            bigtimeInternalObj.status(timeFrom, timeTo, true, false);
 
                             __getEvents__(timeFrom, timeTo);
                         };
@@ -788,7 +792,7 @@
                         window.requestAnimationFrame(
                             function() {
                                 if (!isUndefined(__curAnimationDestination)) {
-                                    timelineInternalObj.setPosition(
+                                    bigtimeInternalObj.setPosition(
                                         undefined,
                                         __curAnimationDestination,
                                         __curAnimationStepCallback,
@@ -815,22 +819,22 @@
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.status = function(timeFrom, timeTo, loading, error) {
+                bigtimeInternalObj.status = function(timeFrom, timeTo, loading, error) {
                     var timeframeFrom = floor(__getTimeframeByTime__(timeFrom)),
                         timeframeTo = floor(__getTimeframeByTime__(timeTo)),
                         timeframe,
-                        i;
+                        i,
+                        deferClass = function(elem) {
+                            window.setTimeout(function() {
+                                elem.className = bemClass('timeframe');
+                            }, 0);
+                        };
 
                     for (i = timeframeFrom; i < timeframeTo; i++) {
                         if ((timeframe = __timeframes[i])) {
                             if (!loading || error) {
                                 if (timeframe.loading) {
-                                    (function(elem) {
-                                        window.setTimeout(function() {
-                                            elem.className = bemClass('timeframe');
-                                        }, 0);
-                                    })(timeframe.elem);
-
+                                    deferClass(timeframe.elem);
                                     timeframe.loading = false;
                                 }
 
@@ -862,26 +866,26 @@
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.events = function(callback) {
+                bigtimeInternalObj.events = function(callback) {
                     __getEvents__ = callback;
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.timing = function(getTimeByTimeframe, getTimeframeByTime, getTicks) {
+                bigtimeInternalObj.timing = function(getTimeByTimeframe, getTimeframeByTime, getTicks) {
                     __getTimeByTimeframe__ = getTimeByTimeframe;
                     __getTimeframeByTime__ = getTimeframeByTime;
                     __getTicks__           = getTicks;
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.bounds = function(viewportSize, preloadBefore, preloadAfter) {
+                bigtimeInternalObj.bounds = function(viewportSize, preloadBefore, preloadAfter) {
                     __viewportSize  = viewportSize;
                     __preloadBefore = preloadBefore;
                     __preloadAfter  = preloadAfter;
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.push = function(timeFrom, timeTo, events) {
+                bigtimeInternalObj.push = function(timeFrom, timeTo, events) {
                     var i,
                         event,
                         newEvent,
@@ -953,25 +957,25 @@
 
                     __adoptEvents__(unadopted);
 
-                    return timelineInternalObj.status(timeFrom, timeTo, false, false);
+                    return bigtimeInternalObj.status(timeFrom, timeTo, false, false);
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.update = function(setStatus) {
+                bigtimeInternalObj.update = function(setStatus) {
                     var timeFrom = __getTimeByTimeframe__(__timeframeFrom),
                         timeTo = __getTimeByTimeframe__(__timeframeTo);
 
-                    timelineInternalObj.setPosition(__position);
+                    bigtimeInternalObj.setPosition(__position);
 
                     if (setStatus) {
-                        timelineInternalObj.status(timeFrom, timeTo, true, false);
+                        bigtimeInternalObj.status(timeFrom, timeTo, true, false);
                     }
 
                     __getEvents__(timeFrom, timeTo);
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.getX = function(time) {
+                bigtimeInternalObj.getX = function(time) {
                     // Returns left position in pixels for time.
                     return round(
                         (__getTimeframeByTime__(time) - __timeframeFrom) * __getTimeframeWidth__() +
@@ -980,7 +984,7 @@
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.byX = function(x) {
+                bigtimeInternalObj.byX = function(x) {
                     // Returns time for left position in pixels.
                     var timeframeWidth = __getTimeframeWidth__();
 
@@ -990,12 +994,12 @@
                 };
                 ///////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////
-                timelineInternalObj.resize = function() {
+                bigtimeInternalObj.resize = function() {
                     if (timeframesElem.clientWidth !== __timeframeElemWidth ||
                         __prevViewportSize !== __viewportSize)
                     {
                         __timeframeElemWidth = undefined;
-                        timelineInternalObj.setPosition(__position);
+                        bigtimeInternalObj.setPosition(__position);
                         __positionEvents__(true);
                     }
                 };
@@ -1008,7 +1012,7 @@
 
                 bindEventFunc(timeframesElem, 'mousemove', function(e) {
                     if (!isUndefined(mousedownX) && !isUndefined(__viewportSize) && e.pageX !== mousedownX) {
-                        timelineInternalObj.setPosition(
+                        bigtimeInternalObj.setPosition(
                             __getTimeByTimeframe__(
                                 __getTimeframeByTime__(__position) +
                                 (mousedownX - e.pageX) / __getTimeframeWidth__()
@@ -1043,6 +1047,7 @@
                         }
 
                         switch (what) {
+                            /* eslint no-fallthrough: 0 */
                             case 'mark':
                                 overlayElem = target.parentNode;
                                 markIndex = target.getAttribute('data-index');
@@ -1071,12 +1076,12 @@
                     }
                 });
 
-                bindEventFunc(document, 'mouseup', function(e) {
+                bindEventFunc(document, 'mouseup', function() {
                     mousedownX = mousemoved = undefined;
                 });
 
                 bindEventFunc(leftElem, 'click', function() {
-                    timelineInternalObj.setPosition(
+                    bigtimeInternalObj.setPosition(
                         undefined,
                         __getTimeByTimeframe__(
                             __getTimeframeByTime__(__position) - __viewportSize * 0.4
@@ -1085,7 +1090,7 @@
                 });
 
                 bindEventFunc(rightElem, 'click', function() {
-                    timelineInternalObj.setPosition(
+                    bigtimeInternalObj.setPosition(
                         undefined,
                         __getTimeByTimeframe__(
                             __getTimeframeByTime__(__position) + __viewportSize * 0.4
@@ -1095,7 +1100,7 @@
 
                 bindMouseWheel(timeframesElem, function(delta) {
                     if (!isUndefined(__minTime)) {
-                        timelineInternalObj.setPosition(
+                        bigtimeInternalObj.setPosition(
                             __getTimeByTimeframe__(
                                 __getTimeframeByTime__(__position) + __viewportSize * delta * 0.002
                             )
@@ -1118,7 +1123,7 @@
                         }
 
                         if (move) {
-                            timelineInternalObj.setPosition(
+                            bigtimeInternalObj.setPosition(
                                 __getTimeByTimeframe__(
                                     __getTimeframeByTime__(__position) +
                                     move * __viewportSize * (e.shiftKey ? 0.4 : 0.05)
@@ -1182,7 +1187,7 @@
 
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.bounds = function(bounds) {
+        bigtimeObj.bounds = function(bounds) {
             if (!isUndefined(bounds)) {
                 var key,
                     b;
@@ -1198,25 +1203,25 @@
 
             css(__scalerElem, {display: isUndefined(__evaluatedBounds.minViewport) || isUndefined(__evaluatedBounds.maxViewport) ? 'none' : 'block'});
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.events = function(callback) {
-            __mainView.events(bind(timelineObj, callback));
+        bigtimeObj.events = function(callback) {
+            __mainView.events(bind(bigtimeObj, callback));
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.timing = function(getTimeByTimeframe, getTimeframeByTime, getTicks) {
+        bigtimeObj.timing = function(getTimeByTimeframe, getTimeframeByTime, getTicks) {
             __mainView.timing(getTimeByTimeframe, getTimeframeByTime, getTicks);
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.position = function(pos) {
+        bigtimeObj.position = function(pos) {
             if (isUndefined(pos)) {
                 return __mainView.getPosition();
             } else {
@@ -1224,12 +1229,12 @@
 
                 __mainView.setPosition(pos);
 
-                return timelineObj;
+                return bigtimeObj;
             }
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.push = function(timeFrom, timeTo, events) {
+        bigtimeObj.push = function(timeFrom, timeTo, events) {
             __mainViewError = __mainView.push(timeFrom, timeTo, events);
 
             if (!__mainViewError) {
@@ -1238,11 +1243,11 @@
 
             __scheduleUpdate__();
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.error = function(timeFrom, timeTo, message) {
+        bigtimeObj.error = function(timeFrom, timeTo, message) {
             css(__errorElem, {display: 'block'});
 
             $C(__errorElem.firstChild, true)
@@ -1253,21 +1258,21 @@
 
             __scheduleUpdate__();
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.resize = function() {
+        bigtimeObj.resize = function() {
             __evaluateBounds__();
             __mainView.resize();
             __scrollBar.resize();
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
-        timelineObj.on = function(what, callback) {
-            callback = bind(timelineObj, callback);
+        bigtimeObj.on = function(what, callback) {
+            callback = bind(bigtimeObj, callback);
 
             switch (what) {
                 case 'click':
@@ -1279,7 +1284,7 @@
                     break;
             }
 
-            return timelineObj;
+            return bigtimeObj;
         };
         ///////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////
@@ -1300,8 +1305,8 @@
                         if (viewport > maxViewport) {
                             viewport = maxViewport;
                         }
-                        timelineObj.bounds({viewport: viewport});
-                        timelineObj.resize();
+                        bigtimeObj.bounds({viewport: viewport});
+                        bigtimeObj.resize();
                     }
                 }
             });
@@ -1309,7 +1314,6 @@
 
         $C(container, true)
             .div(createAttributes())
-                .act(function() { __elem = this; })
                 .div(createAttributes('error-wrapper'))
                     .act(function() { __errorElem = this; })
                         .span(createAttributes('error'))
@@ -1334,7 +1338,7 @@
                 .end(2)
                 .div(createAttributes('timeframes'))
                     .act(function() {
-                        __mainView = new TimelineInternal(
+                        __mainView = new BigtimeInternal(
                             this,
                             __mainViewLeftElem,
                             __mainViewRightElem,
@@ -1380,7 +1384,7 @@
                 .end(2)
                 .div(createAttributes('scrollbar'))
                     .act(function() {
-                        __scrollBar = new TimelineInternal(
+                        __scrollBar = new BigtimeInternal(
                             this,
                             __scrollBarLeftElem,
                             __scrollBarRightElem,
@@ -1418,7 +1422,7 @@
                 return (time - __actualMinTime % _24hours) / _24hours;
             },
             ///////////////////////////////////////////////////////////////////
-            function(timeFrom, timeTo) {
+            function(timeFrom/*, timeTo*/) {
                 // __getTicks__ for main view.
                 var d = new Date(timeFrom);
                 defaultTicks[0].label = months[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear();
@@ -1469,7 +1473,7 @@
 
             __resizeTimer = window.setTimeout(function() {
                 __resizeTimer = undefined;
-                timelineObj.resize();
+                bigtimeObj.resize();
             }, 100);
         });
     };
