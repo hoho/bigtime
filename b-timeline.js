@@ -1,7 +1,6 @@
 /*!
- * b-timeline v0.1.0, https://github.com/hoho/b-timeline
- * Copyright 2013 Marat Abdullin
- * Released under the MIT license
+ * b-timeline v0.2.0, https://github.com/hoho/b-timeline
+ * (c) 2013-2015 Marat Abdullin, MIT license
  */
 (function(window, document, undefined) {
     'use strict';
@@ -275,9 +274,9 @@
                                 .div(createAttributes('timeframe'))
                                     .act(function() { t.elem = this; })
                                     .each(__getTicks__(timeFrom, timeTo))
-                                        .div(createAttributes('tick', {style: {left: function(index, item) { return item.left; }}}))
+                                        .div(createAttributes('tick', {style: {left: function(item) { return item.left; }}}))
                                             .span()
-                                                .text(function(index, item) { return item.label; })
+                                                .text(function(item) { return item.label; })
                                     .end(3)
                                     .div(createAttributes('events-wrapper'))
                                         .div(createAttributes('events'))
