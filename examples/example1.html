@@ -26,8 +26,8 @@ body
 <script src="https://yandex.st/jquery/1.10.2/jquery.min.js"></script>
 
 <script src="https://rawgithub.com/hoho/concat.js/master/concat.min.js"></script>
-<script src="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.js"></script>
-
+<!--<script src="https://rawgithub.com/hoho/b-timeline/master/b-timeline.min.js"></script>-->
+<script src="../b-timeline.js"></script>
 <script>
 
 (function(w) {
@@ -54,7 +54,7 @@ timeline
     // Setting Timeline bounds.
     .bounds({
         minTime: new Date(2010, 0, 1).getTime(),
-        maxTime: new Date(2015, 0, 1).getTime(),
+        maxTime: new Date(new Date().getFullYear() + 2, 0, 1).getTime(),
         preloadBefore: 2,
         preloadAfter: 2,
         viewport: 2,
